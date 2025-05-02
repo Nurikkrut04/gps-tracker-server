@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GPS Tracker Map</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { height: 100vh; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([51.16, 71.47], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data © OpenStreetMap contributors'
+        }).addTo(map);
+
+        fetch('/api/track')
+            .then(res => res.json())
+            .then(data => {
+                const points = data.map(p => [p.lat, p.lon]);
+                if (points.length > 0) {
+                    L.polyline(points, { color: 'red' }).addTo(map);
+                    L.marker(points[points.length - 1]).addTo(map)
+                      .bindPopup("Текущая позиция").openPopup();
+                    map.setView(points[points.length - 1], 17);
+                }
+            });
+    </script>
+</body>
+</html>
